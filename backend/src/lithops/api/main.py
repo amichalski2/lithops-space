@@ -43,6 +43,7 @@ from lithops.domain.errors import BenchmarkContractError, NotFoundError, Operati
 from lithops.domain.models import DecisionRecord, EventRecord, RunRecord, StepResult
 from lithops.domain.world_model import WorldModelVersion
 from lithops.infrastructure.llm import OpenRouterProvider
+from lithops.infrastructure.observability import init_tracing
 from lithops.infrastructure.persistence.repositories import (
     InMemoryRunRepository,
     SupabaseRunRepository,
@@ -75,6 +76,7 @@ ExecutionManagerDependency = Annotated[RunManager, Depends(get_execution_manager
 def build_manager(settings: Settings | None = None) -> RunManager:
     resolved = settings or Settings.from_env()
     resolved.validate()
+    init_tracing()
 
     if resolved.storage_backend == "supabase":
         repository = SupabaseRunRepository(

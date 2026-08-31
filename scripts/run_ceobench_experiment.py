@@ -35,6 +35,7 @@ from lithops.domain.experiment_contracts import (
 from lithops.domain.models import RunRecord, RunStatus
 from lithops.infrastructure.llm import FalRouterProvider, OpenRouterProvider
 from lithops.infrastructure.llm.gemini_adk_provider import GeminiAdkProvider
+from lithops.infrastructure.observability import init_tracing
 from lithops.infrastructure.persistence.repositories import SupabaseRunRepository
 from lithops.worker import AutonomousRunWorker
 
@@ -839,6 +840,7 @@ async def run_experiment(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> None:
     load_dotenv(PROJECT_ROOT / ".env", override=False)
+    init_tracing(service_name="lithops-runner")
     args = parse_args()
     report = asyncio.run(run_experiment(args))
     print(json.dumps(report["summary"], indent=2, default=str))

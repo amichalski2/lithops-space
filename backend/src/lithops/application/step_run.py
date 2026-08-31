@@ -77,6 +77,8 @@ from lithops.evaluation.prediction_ledger import (
     mature_cash_predictions,
 )
 from lithops.evaluation.trajectory import revealed_quality_bar_lower_bound
+from lithops.infrastructure.observability import span
+from lithops.infrastructure.security.model_armor import REDACTION_NOTICE, get_screener
 from lithops.model_runtime import TemporalObservation
 from lithops.simulator.strategy_search import NoViableStrategyError
 from lithops.world_model import (
@@ -370,10 +372,11 @@ class RunManager:
             return result.model_copy(update={"replayed": True}, deep=True)
 
         try:
-            result = await self._execute_week(
-                run_id,
-                allow_pausing=recover_in_progress,
-            )
+            with span("lithops.week", run_id=str(run_id), request_id=request_id):
+                result = await self._execute_week(
+                    run_id,
+                    allow_pausing=recover_in_progress,
+                )
         except Exception as exc:
             await self.repository.fail_operation(run_id, request_id, str(exc))
             if isinstance(exc, NoViableStrategyError):
@@ -420,7 +423,9 @@ class RunManager:
         if session_id is None:
             raise RunStateError("benchmark session was not persisted")
 
-        external_state = await self._observe_with_evidence(session_id)
+        with span("week.observe"):
+            external_state = await self._observe_with_evidence(session_id)
+        external_state = await self._screen_untrusted_text(run, external_state)
         checkpoint_day = run.current_day
         expected_next_day = min(checkpoint_day + 7, run.horizon_days)
         if external_state.day not in {checkpoint_day, expected_next_day}:
@@ -454,8 +459,10 @@ class RunManager:
             return await self._commit_week(run, decision, receipts, external_state)
 
         if decision is None:
-            world_model = await self._process_learning(run, external_state)
-            decision = await self._prepare_decision(run, external_state, world_model)
+            with span("week.learn", week=week):
+                world_model = await self._process_learning(run, external_state)
+            with span("week.decide", week=week):
+                decision = await self._prepare_decision(run, external_state, world_model)
         else:
             await self._ensure_prediction(decision)
 
@@ -465,11 +472,12 @@ class RunManager:
             receipts = await self.repository.list_receipts(decision.id)
             return await self._commit_week(run, decision, receipts, decision.actual_outcome)
 
-        receipts = await self._execute_missing_actions(
-            run=run,
-            session_id=session_id,
-            decision=decision,
-        )
+        with span("week.execute_actions", week=week):
+            receipts = await self._execute_missing_actions(
+                run=run,
+                session_id=session_id,
+                decision=decision,
+            )
         after_actions = await self._observe_with_evidence(session_id)
         program = decision.action_plan.experiment_program
         if (
@@ -504,12 +512,13 @@ class RunManager:
                 )
             )
         if after_actions.day == decision.observation.day:
-            actual = await self.benchmark.advance_week(
-                session_id,
-                rationale=decision.action_plan.rationale,
-                forecasts=decision.forecasts,
-            )
-            actual = await self._attach_evidence(session_id, actual)
+            with span("week.advance", week=week):
+                actual = await self.benchmark.advance_week(
+                    session_id,
+                    rationale=decision.action_plan.rationale,
+                    forecasts=decision.forecasts,
+                )
+                actual = await self._attach_evidence(session_id, actual)
         elif after_actions.day == expected_next_day:
             actual = after_actions
             await self._event(
@@ -522,7 +531,8 @@ class RunManager:
                 "benchmark changed by more than one week during a decision: "
                 f"before={decision.observation.day}, after={after_actions.day}"
             )
-        return await self._commit_week(run, decision, receipts, actual)
+        with span("week.commit", week=week):
+            return await self._commit_week(run, decision, receipts, actual)
 
     async def _negotiate_enterprise_threads(
         self,
@@ -731,6 +741,54 @@ class RunManager:
                         "parse_status": insight.parse_status.value,
                     },
                 )
+
+    async def _screen_untrusted_text(
+        self, run: RunRecord, observation: ObservationSnapshot
+    ) -> ObservationSnapshot:
+        """Screen environment-authored text through Model Armor before any brief is built.
+
+        Only the decision-facing snapshot is screened here; outcome snapshots
+        re-enter through the next week's observe and are screened then. The
+        verdict always lands on the event ledger, including screening errors,
+        so an API outage never reads as "nothing was flagged".
+        """
+
+        screener = get_screener()
+        if screener is None:
+            return observation
+        texts = {
+            key: value
+            for key, value in observation.metrics.items()
+            if isinstance(value, str) and value.strip()
+        }
+        if not texts:
+            return observation
+        with span("week.screen_untrusted_text"):
+            results = await screener.screen(texts)
+        flagged = [result for result in results if result.flagged]
+        errored = [result for result in results if result.error]
+        await self._event(
+            run.id,
+            "security.model_armor",
+            {
+                "day": observation.day,
+                "mode": screener.mode,
+                "screened_fields": sorted(texts),
+                "flagged": [
+                    {"field": result.field, "filters": list(result.filters)}
+                    for result in flagged
+                ],
+                "errors": [
+                    {"field": result.field, "error": result.error} for result in errored
+                ],
+            },
+        )
+        if screener.mode != "enforce" or not flagged:
+            return observation
+        metrics = dict(observation.metrics)
+        for result in flagged:
+            metrics[result.field] = REDACTION_NOTICE
+        return observation.model_copy(update={"metrics": metrics}, deep=True)
 
     async def _observe_with_evidence(self, session_id: str) -> ObservationSnapshot:
         observation = await self.benchmark.observe_status(session_id)

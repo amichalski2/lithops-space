@@ -29,6 +29,8 @@ test("shows only services that exist in the submitted architecture", () => {
   expect(stack).toHaveTextContent("Cloud Storage");
   expect(stack).toHaveTextContent("Secret Manager");
   expect(stack).toHaveTextContent("Cloud Logging");
+  expect(stack).toHaveTextContent("Model Armor");
+  expect(stack).toHaveTextContent("Cloud Trace");
   expect(stack).toHaveTextContent("Supabase");
   expect(stack).not.toHaveTextContent("BYOK");
   expect(stack).not.toHaveTextContent("Firestore");

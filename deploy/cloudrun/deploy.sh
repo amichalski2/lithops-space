@@ -22,6 +22,11 @@ SUPABASE_KEY_SECRET="${SUPABASE_KEY_SECRET:-lithops-supabase-secret-key}"
 # The simulated company runs its own customer model on Anthropic; that is the
 # benchmark's credential, not the agent's, and it refuses to start without it.
 ANTHROPIC_SECRET="${ANTHROPIC_SECRET:-lithops-anthropic-api-key}"
+# Model Armor screens environment-authored text (inbox, social) before it
+# reaches the executive brief; Cloud Trace carries the weekly reasoning chain.
+MODEL_ARMOR_MODE="${MODEL_ARMOR_MODE:-monitor}"
+MODEL_ARMOR_TEMPLATE="${MODEL_ARMOR_TEMPLATE:-projects/${PROJECT_ID}/locations/europe-west4/templates/lithops-untrusted-text}"
+TRACING="${TRACING:-on}"
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 
 echo "==> enabling APIs"
@@ -97,7 +102,7 @@ gcloud run jobs "${ACTION}" "${JOB_NAME}" \
   --memory 4Gi \
   --max-retries 1 \
   --task-timeout 24h \
-  --set-env-vars "ARTIFACT_BUCKET=${ARTIFACT_BUCKET}" \
+  --set-env-vars "^@^ARTIFACT_BUCKET=${ARTIFACT_BUCKET}@LITHOPS_MODEL_ARMOR=${MODEL_ARMOR_MODE}@LITHOPS_MODEL_ARMOR_TEMPLATE=${MODEL_ARMOR_TEMPLATE}@LITHOPS_TRACING=${TRACING}" \
   --set-secrets "GEMINI_API_KEY=${GEMINI_SECRET}:latest,SUPABASE_URL=${SUPABASE_URL_SECRET}:latest,SUPABASE_SECRET_KEY=${SUPABASE_KEY_SECRET}:latest,ANTHROPIC_API_KEY=${ANTHROPIC_SECRET}:latest"
 
 echo

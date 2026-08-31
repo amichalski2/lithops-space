@@ -26,12 +26,12 @@ WORKDIR /app
 # Resolve the locked dependency set before copying source, so ordinary code edits
 # do not invalidate the dependency layer.
 COPY pyproject.toml uv.lock README.md ./
-RUN uv sync --frozen --no-install-project --no-dev --extra agents
+RUN uv sync --frozen --no-install-project --no-dev --extra agents --extra cloud
 
 COPY backend/src ./backend/src
 # --no-editable matters: the default editable install only links back to /app, which
 # the runtime stage does not carry, so the package would be missing at import time.
-RUN uv sync --frozen --no-dev --extra agents --no-editable
+RUN uv sync --frozen --no-dev --extra agents --extra cloud --no-editable
 
 FROM python:3.13-slim-bookworm AS runtime
 

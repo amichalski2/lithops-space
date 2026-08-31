@@ -177,6 +177,23 @@ PROJECT_ID=your-project CEOBENCH_PUBLIC_DIR=/path/to/ceobench-src/public bash de
 PROJECT_ID=your-project RUN_NAME=my-72w-run SEED=137 WEEKS=72 bash deploy/cloudrun/execute.sh
 ```
 
+### Model Armor and Cloud Trace (optional, on by default in the job)
+
+The environment writes free text into the observation (inbox threads, market
+announcements), which makes it a prompt-injection surface. With
+`LITHOPS_MODEL_ARMOR=monitor` every string field is screened through a Google
+Cloud [Model Armor](https://cloud.google.com/security-command-center/docs/model-armor-overview)
+template before the executive brief is built; verdicts, including screening
+errors, land on the run's event ledger as `security.model_armor` events.
+`enforce` additionally redacts flagged fields. Set
+`LITHOPS_MODEL_ARMOR_TEMPLATE` to a template resource name
+(`projects/<p>/locations/<l>/templates/<t>`).
+
+`LITHOPS_TRACING=on` exports one OpenTelemetry trace per simulated week to
+Cloud Trace (observe → learn → decide → execute → advance → commit), so the
+reasoning chain of any week can be read as a waterfall. Both features fail
+open and are disabled by default outside the job.
+
 ## Generated-code boundary
 
 Generated model components are treated as untrusted input: AST validation, no imports, size limits, execution in a separate process with an empty environment and a wall-clock timeout. This is an application-level boundary; add container or OS-level isolation before evaluating code from unknown users.

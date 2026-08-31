@@ -44,7 +44,7 @@ COPY pyproject.toml README.md ./
 COPY backend/ ./backend/
 # `agents` carries google-adk: the Executive reasons through ADK, so it is not
 # optional for a run even though it is an optional extra for a library consumer.
-RUN pip install --no-cache-dir -e ".[agents]"
+RUN pip install --no-cache-dir -e ".[agents,cloud]"
 
 COPY scripts/ ./scripts/
 COPY deploy/cloudrun/entrypoint.sh ./entrypoint.sh

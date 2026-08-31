@@ -10,6 +10,8 @@ const STACK = [
   "Cloud Storage",
   "Secret Manager",
   "Cloud Logging",
+  "Model Armor",
+  "Cloud Trace",
   "Supabase",
 ];
 

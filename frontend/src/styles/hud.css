@@ -1,0 +1,208 @@
+/* ==========================================================================
+   HUD — the glass instrument layer shared by every in-app view.
+
+   This started life inside `cockpit.css`, scoped to `.cockpit` so the landing page would keep the
+   flat terminal look. That scope was right until a second view needed the same treatment: the
+   decision page ended up flat and gold while the cockpit was glass and blue, and the two drifted
+   because there was no shared source. Everything a view needs to *be* an instrument lives here;
+   `cockpit.css` and `decision.css` only describe their own furniture.
+
+   A view opts in by carrying `.hud`. The landing page deliberately does not, which is what keeps
+   the brand gold on the marketing surface and the instrument blue behind the CTA.
+   ========================================================================== */
+.hud {
+  --accent: #5cc0ff;
+  --accent-dim: #2c7cb6;
+  --accent-soft: #5cc0ff1c;
+  --line: #7fbdf033;
+
+  --ink: #e8f2fc;
+  --ink-dim: #93aec6;
+
+  /* Two surfaces: `glass` for panels, `tile` for the rows and cards inside them. Both are
+     translucent, so they pick up the page glow behind them instead of flattening it. */
+  --glass: linear-gradient(157deg, #ffffff14, #74b0e00a 42%, #071523 100%);
+  --glass-line: #8ec6f333;
+  --glass-edge: #ffffff2e;
+  --tile: linear-gradient(158deg, #2d7ec01f, #0d2135b3);
+  --tile-line: #6fb4ea2e;
+  --tile-hover: #3b8fd12e;
+
+  --panel-shadow: 0 26px 64px -30px #00060f, inset 0 1px 0 var(--glass-edge);
+  --radius: 22px;
+  --radius-tile: 14px;
+}
+
+/* The graph-paper overlay is body-wide; in here the honeycomb replaces it. */
+body:has(.hud)::before { display: none; }
+.hud::before {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  content: "";
+  background:
+    radial-gradient(90% 60% at 50% -12%, #1d5c9633 0%, transparent 62%),
+    radial-gradient(70% 50% at 50% 108%, #0d3a6626 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.6' height='60' viewBox='0 0 34.6 60'%3E%3Cg fill='none' stroke='%23bcd9f2' stroke-width='1'%3E%3Cpath d='M17.3 0 34.6 10 34.6 30 17.3 40 0 30 0 10Z'/%3E%3Cpath d='M0 30 17.3 40 17.3 60 0 70 -17.3 60 -17.3 40Z'/%3E%3Cpath d='M34.6 30 51.9 40 51.9 60 34.6 70 17.3 60 17.3 40Z'/%3E%3C/g%3E%3C/svg%3E")
+      0 0 / 104px 180px,
+    #060d16;
+  background-blend-mode: normal, normal, overlay, normal;
+  opacity: 0.94;
+}
+
+/* Surfaces ---------------------------------------------------------------- */
+/* `.hud-panel` is the primitive; the cockpit and the decision page map their own containers onto
+   it rather than restating the recipe. */
+.hud .hud-panel {
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius);
+  background: var(--glass);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(16px) saturate(125%);
+}
+.hud .hud-tile {
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius-tile);
+  background: var(--tile);
+  box-shadow: inset 0 1px 0 #ffffff17;
+}
+
+.hud ::-webkit-scrollbar { width: 6px; height: 6px; }
+.hud ::-webkit-scrollbar-thumb { border-radius: 999px; background: #6ab0e63d; }
+.hud ::-webkit-scrollbar-track { background: transparent; }
+.hud * { scrollbar-width: thin; scrollbar-color: #6ab0e63d transparent; }
+
+/* Headings ---------------------------------------------------------------- */
+.hud .eyebrow {
+  color: var(--ink);
+  font: 600 13px var(--display);
+  letter-spacing: normal;
+}
+/* The version marker is a state the operator checks constantly — a chip so it reads as a value. */
+.hud .chip {
+  padding: 4px 9px;
+  border: 1px solid var(--tile-line);
+  border-radius: 999px;
+  background: var(--tile);
+  color: var(--accent);
+  font: 600 10px var(--text);
+  letter-spacing: normal;
+}
+
+/* Icon badges ------------------------------------------------------------- */
+.hud-badge {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #6cbcf24d;
+  border-radius: 11px;
+  background: linear-gradient(150deg, #86ccff2e, #17497826);
+  color: var(--accent);
+  box-shadow: inset 0 1px 0 #ffffff2e, 0 6px 16px -10px var(--accent);
+}
+.hud-badge svg { width: 18px; height: 18px; }
+
+/* Buttons ----------------------------------------------------------------- */
+.hud .primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 11px;
+  padding: 8px 22px 8px 8px;
+  border: 1px solid #8fd0ff5c;
+  border-radius: 999px;
+  background: linear-gradient(150deg, #ffffff1c, #2c78b83d);
+  color: var(--ink);
+  font: 600 11px var(--display);
+  letter-spacing: normal;
+  box-shadow: inset 0 1px 0 #ffffff33, 0 16px 34px -22px #5cc0ff;
+}
+.hud .primary:hover:not(:disabled) {
+  border-color: #a8dcff8f;
+  background: linear-gradient(150deg, #ffffff2b, #3d8fd44d);
+  box-shadow: inset 0 1px 0 #ffffff42, 0 18px 38px -18px #5cc0ff;
+  transform: none;
+}
+.hud .ghost {
+  padding: 11px 14px;
+  border: 1px solid var(--tile-line);
+  border-radius: 999px;
+  background: var(--tile);
+  color: #b6cfe4;
+  font: 500 11px var(--text);
+  letter-spacing: normal;
+  transition: 0.18s ease;
+}
+.hud .ghost:hover:not(:disabled) { border-color: var(--tile-hover); color: var(--accent); }
+.hud .ghost:disabled { cursor: not-allowed; opacity: 0.45; }
+
+/* Verdict pills ----------------------------------------------------------- */
+/* One vocabulary for every graded thing: a forecast on the cockpit ledger, the same forecast on
+   the decision page, and an action receipt all read as the same kind of judgement. */
+.hud .verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font: 600 10px var(--text);
+  font-style: normal;
+  letter-spacing: normal;
+  white-space: nowrap;
+}
+.hud .verdict svg { width: 11px; height: 11px; }
+.hud .verdict-hit { color: var(--positive); border: 1px solid #56d9a64d; background: #56d9a614; }
+.hud .verdict-miss { color: var(--danger); border: 1px solid #ff6b5b5c; background: #ff6b5b14; }
+.hud .verdict-warning { color: var(--warning); border: 1px solid #f5a5245c; background: #f5a52414; }
+.hud .verdict-open, .hud .verdict-pending, .hud .verdict-awaiting {
+  color: var(--ink-dim);
+  border: 1px solid var(--tile-line);
+  background: #ffffff08;
+}
+
+/* Parameter rows ---------------------------------------------------------- */
+/* Shared because the cockpit's world-model panel and the decision page's model diff show the same
+   thing; they differ only in what the sub-line cites (bounds vs. evidence). */
+.hud .parameter-list { display: flex; flex-direction: column; gap: 8px; margin-top: 13px; border-top: 0; }
+.hud .parameter-list article {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 12px;
+  padding: 10px 13px 11px;
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius-tile);
+  background: var(--tile);
+  box-shadow: inset 0 1px 0 #ffffff17;
+}
+.hud .parameter-list article > div { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.hud .parameter-list strong { color: var(--ink); font: 500 12px var(--text); letter-spacing: 0.01em; }
+.hud .parameter-list small { color: #6d8ba6; font: 400 10px var(--text); }
+.hud .parameter-list span {
+  color: var(--ink);
+  font: 600 clamp(16px, 1.4vw, 20px) var(--display);
+  letter-spacing: -0.01em;
+}
+.hud .parameter-list .confidence-track {
+  grid-column: 1 / -1;
+  height: 2px;
+  margin: 10px 0 0;
+  border-radius: 999px;
+  background: #ffffff0d;
+}
+.hud .confidence-track i { border-radius: 999px; background: linear-gradient(90deg, #2c7cb666, #5cc0ff8c); }
+
+.hud .model-changes {
+  margin-top: 14px;
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius-tile);
+  background: #0a1c2e80;
+}
+
+/* Status strips ----------------------------------------------------------- */
+.hud .terminal-state,
+.hud .failure-state,
+.hud .pause-state,
+.hud .error-notice { border-radius: var(--radius-tile); backdrop-filter: blur(10px); }

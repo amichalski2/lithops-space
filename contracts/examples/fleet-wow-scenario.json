@@ -1,0 +1,556 @@
+{
+  "causal_strategy_replay": {
+    "explanation": "With observation and rollout worlds held fixed, replacing only marketing_saturation with its learned value changes the robust winner.",
+    "full_new_model_strategy": "cash_preservation",
+    "observation_day": 28,
+    "old_model_strategy": "pricing_efficiency",
+    "only_marketing_saturation_updated_strategy": "cash_preservation",
+    "persisted_strategy": "cash_preservation",
+    "simulation_seed": 50028
+  },
+  "dynamic_fleet": {
+    "active_model_version": 5,
+    "base_model_version": 4,
+    "builder_calls": [
+      {
+        "attempt": 1,
+        "builder_name": "acquisition_builder",
+        "builder_version": "2.0",
+        "input_hash_present": true,
+        "model_name": "bounded-hypothesis-fixture-v1",
+        "prompt_version": "acquisition-builder-v2-grounded-evidence",
+        "provider": "deterministic",
+        "status": "completed"
+      },
+      {
+        "attempt": 1,
+        "builder_name": "pricing_builder",
+        "builder_version": "2.0",
+        "input_hash_present": true,
+        "model_name": "bounded-hypothesis-fixture-v1",
+        "prompt_version": "pricing-builder-v2-grounded-evidence",
+        "provider": "deterministic",
+        "status": "completed"
+      }
+    ],
+    "hypotheses": [
+      {
+        "builder_name": "acquisition_builder",
+        "family": "acquisition_efficiency",
+        "parameter_changes": [
+          {
+            "direction": "decrease",
+            "parameter": "marketing_saturation",
+            "step_size": "large"
+          }
+        ],
+        "penalized_improvement": 0.004771,
+        "supported": true
+      },
+      {
+        "builder_name": "pricing_builder",
+        "family": "pricing_response",
+        "parameter_changes": [
+          {
+            "direction": "increase",
+            "parameter": "price_elasticity",
+            "step_size": "medium"
+          }
+        ],
+        "penalized_improvement": 4.6e-05,
+        "supported": false
+      }
+    ],
+    "permission_boundary": {
+      "benchmark_calls_unchanged": true,
+      "denied_tool": "set_prices",
+      "input_hash_present": true,
+      "raw_input_absent": true,
+      "reason_code": "tool_not_allowed_for_role"
+    },
+    "rejected_builders": [
+      "pricing_builder"
+    ],
+    "requested_builders": [
+      "acquisition_builder",
+      "pricing_builder"
+    ],
+    "resolution": "accepted",
+    "selected_builders": [
+      "acquisition_builder"
+    ],
+    "trigger_status": "completed"
+  },
+  "event_trace": [
+    {
+      "selected_strategy": "pricing_efficiency",
+      "type": "decision.prepared",
+      "week": 0
+    },
+    {
+      "target_days": [
+        7,
+        28,
+        84,
+        182
+      ],
+      "type": "prediction.committed"
+    },
+    {
+      "tool": "set_prices",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_daily_spend",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_targeted_ad_spend",
+      "type": "action.executed"
+    },
+    {
+      "observed_day": 7,
+      "type": "decision.committed",
+      "week": 0
+    },
+    {
+      "day": 7,
+      "interval_hit": false,
+      "type": "prediction.matured"
+    },
+    {
+      "rebuild_recommended": false,
+      "status": "watching",
+      "type": "model_health.evaluated"
+    },
+    {
+      "changed_parameters": [
+        "price_elasticity",
+        "marketing_saturation",
+        "churn_sensitivity"
+      ],
+      "type": "world_model.updated",
+      "version": 2
+    },
+    {
+      "selected_strategy": "pricing_efficiency",
+      "type": "decision.prepared",
+      "week": 1
+    },
+    {
+      "target_days": [
+        14,
+        35,
+        91,
+        189
+      ],
+      "type": "prediction.committed"
+    },
+    {
+      "tool": "set_prices",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_daily_spend",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_targeted_ad_spend",
+      "type": "action.executed"
+    },
+    {
+      "observed_day": 14,
+      "type": "decision.committed",
+      "week": 1
+    },
+    {
+      "day": 14,
+      "interval_hit": false,
+      "type": "prediction.matured"
+    },
+    {
+      "rebuild_recommended": false,
+      "status": "watching",
+      "type": "model_health.evaluated"
+    },
+    {
+      "changed_parameters": [
+        "price_elasticity",
+        "marketing_saturation",
+        "churn_sensitivity"
+      ],
+      "type": "world_model.updated",
+      "version": 3
+    },
+    {
+      "selected_strategy": "pricing_efficiency",
+      "type": "decision.prepared",
+      "week": 2
+    },
+    {
+      "target_days": [
+        21,
+        42,
+        98,
+        196
+      ],
+      "type": "prediction.committed"
+    },
+    {
+      "tool": "set_prices",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_daily_spend",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_targeted_ad_spend",
+      "type": "action.executed"
+    },
+    {
+      "observed_day": 21,
+      "type": "decision.committed",
+      "week": 2
+    },
+    {
+      "day": 21,
+      "interval_hit": false,
+      "type": "prediction.matured"
+    },
+    {
+      "rebuild_recommended": true,
+      "status": "degraded",
+      "type": "model_health.evaluated"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_challenge.started"
+    },
+    {
+      "builder_name": "acquisition_builder",
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_builder.completed"
+    },
+    {
+      "builder_name": "pricing_builder",
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_builder.completed"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": true,
+      "tool": null,
+      "type": "hypothesis.backtested"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": false,
+      "tool": null,
+      "type": "hypothesis.backtested"
+    },
+    {
+      "builder_name": null,
+      "resolution": "accepted",
+      "supported": null,
+      "tool": null,
+      "type": "model_challenge.completed"
+    },
+    {
+      "changed_parameters": [
+        "marketing_saturation"
+      ],
+      "type": "world_model.updated",
+      "version": 4
+    },
+    {
+      "selected_strategy": "cash_preservation",
+      "type": "decision.prepared",
+      "week": 3
+    },
+    {
+      "target_days": [
+        28,
+        49,
+        105,
+        203
+      ],
+      "type": "prediction.committed"
+    },
+    {
+      "tool": "set_prices",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_daily_spend",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_targeted_ad_spend",
+      "type": "action.executed"
+    },
+    {
+      "observed_day": 28,
+      "type": "decision.committed",
+      "week": 3
+    },
+    {
+      "day": 28,
+      "interval_hit": false,
+      "type": "prediction.matured"
+    },
+    {
+      "day": 28,
+      "interval_hit": false,
+      "type": "prediction.matured"
+    },
+    {
+      "rebuild_recommended": true,
+      "status": "degraded",
+      "type": "model_health.evaluated"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_challenge.started"
+    },
+    {
+      "builder_name": "acquisition_builder",
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_builder.completed"
+    },
+    {
+      "builder_name": "pricing_builder",
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_builder.completed"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": true,
+      "tool": null,
+      "type": "hypothesis.backtested"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": true,
+      "tool": null,
+      "type": "hypothesis.backtested"
+    },
+    {
+      "builder_name": null,
+      "resolution": "merged",
+      "supported": null,
+      "tool": null,
+      "type": "model_challenge.completed"
+    },
+    {
+      "changed_parameters": [
+        "price_elasticity",
+        "marketing_saturation"
+      ],
+      "type": "world_model.updated",
+      "version": 5
+    },
+    {
+      "selected_strategy": "cash_preservation",
+      "type": "decision.prepared",
+      "week": 4
+    },
+    {
+      "target_days": [
+        35,
+        56,
+        112,
+        210
+      ],
+      "type": "prediction.committed"
+    },
+    {
+      "tool": "set_prices",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_daily_spend",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_targeted_ad_spend",
+      "type": "action.executed"
+    },
+    {
+      "observed_day": 35,
+      "type": "decision.committed",
+      "week": 4
+    },
+    {
+      "day": 35,
+      "interval_hit": false,
+      "type": "prediction.matured"
+    },
+    {
+      "day": 35,
+      "interval_hit": false,
+      "type": "prediction.matured"
+    },
+    {
+      "rebuild_recommended": true,
+      "status": "degraded",
+      "type": "model_health.evaluated"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_challenge.started"
+    },
+    {
+      "builder_name": "acquisition_builder",
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_builder.completed"
+    },
+    {
+      "builder_name": "pricing_builder",
+      "resolution": null,
+      "supported": null,
+      "tool": null,
+      "type": "model_builder.completed"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": true,
+      "tool": null,
+      "type": "hypothesis.backtested"
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": true,
+      "tool": null,
+      "type": "hypothesis.backtested"
+    },
+    {
+      "builder_name": null,
+      "resolution": "merged",
+      "supported": null,
+      "tool": null,
+      "type": "model_challenge.completed"
+    },
+    {
+      "changed_parameters": [
+        "price_elasticity",
+        "marketing_saturation"
+      ],
+      "type": "world_model.updated",
+      "version": 6
+    },
+    {
+      "selected_strategy": "pricing_efficiency",
+      "type": "decision.prepared",
+      "week": 5
+    },
+    {
+      "target_days": [
+        42,
+        63,
+        119,
+        217
+      ],
+      "type": "prediction.committed"
+    },
+    {
+      "tool": "set_prices",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_daily_spend",
+      "type": "action.executed"
+    },
+    {
+      "tool": "set_targeted_ad_spend",
+      "type": "action.executed"
+    },
+    {
+      "observed_day": 42,
+      "type": "decision.committed",
+      "week": 5
+    },
+    {
+      "builder_name": null,
+      "resolution": null,
+      "supported": null,
+      "tool": "set_prices",
+      "type": "agent.permission_denied"
+    }
+  ],
+  "evidence_boundary": "Deterministic development harness; not primary CEO-Bench benchmark evidence.",
+  "model_health": {
+    "evaluated_day": 28,
+    "rebuild_recommended": true,
+    "status": "degraded",
+    "trigger_codes": [
+      "two_of_last_three_interval_misses",
+      "rolling_normalized_error_high",
+      "persistent_directional_bias"
+    ]
+  },
+  "parameter_update": {
+    "evidence_days": [
+      7,
+      14,
+      21,
+      28
+    ],
+    "method": "model_challenge_backtest_v1",
+    "name": "marketing_saturation",
+    "new_confidence": 0.171109,
+    "new_estimate": 0.37,
+    "new_model_version": 5,
+    "old_confidence": 0.171109,
+    "old_estimate": 0.44,
+    "old_model_version": 4
+  },
+  "prediction_miss": {
+    "actual_cash": 550000.0,
+    "horizon_days": 28,
+    "interval_95": [
+      1113400.121455,
+      1133308.29375
+    ],
+    "interval_hit": false,
+    "issued_day": 0,
+    "normalized_absolute_error": 1.041053,
+    "predicted_cash": 1122579.158426,
+    "signed_residual_actual_minus_prediction": -572579.158426,
+    "target_day": 28
+  },
+  "run": {
+    "completed_steps": 6,
+    "final_observed_day": 42,
+    "horizon_days": 42,
+    "prediction_before_action_verified": true,
+    "replay_without_duplicate_action_or_advance": true,
+    "rollouts_per_candidate": 80
+  },
+  "scenario": "paid-acquisition-saturation-shock-v1"
+}

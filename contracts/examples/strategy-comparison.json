@@ -1,0 +1,47 @@
+{
+  "scenario": "milestone-2-seeded-search",
+  "seed": 99,
+  "horizon_weeks": 6,
+  "rollouts_per_candidate": 40,
+  "selection_reason_code": "survival_gated_robust_utility",
+  "candidates": [
+    {
+      "strategy": "aggressive_growth",
+      "expected_ending_cash": 669240.42,
+      "downside_ending_cash_p10": 643833.39,
+      "bankruptcy_probability": 0.0,
+      "expected_customer_growth": 457.6,
+      "robustness": "high",
+      "robust_utility": 0.347936
+    },
+    {
+      "strategy": "balanced_growth",
+      "expected_ending_cash": 672782.44,
+      "downside_ending_cash_p10": 657339.43,
+      "bankruptcy_probability": 0.0,
+      "expected_customer_growth": 145.76,
+      "robustness": "high",
+      "robust_utility": 0.28326
+    },
+    {
+      "strategy": "cash_preservation",
+      "expected_ending_cash": 706547.46,
+      "downside_ending_cash_p10": 697534.62,
+      "bankruptcy_probability": 0.0,
+      "expected_customer_growth": -6.61,
+      "robustness": "high",
+      "robust_utility": 0.300958
+    },
+    {
+      "strategy": "pricing_efficiency",
+      "expected_ending_cash": 712776.58,
+      "downside_ending_cash_p10": 696341.02,
+      "bankruptcy_probability": 0.0,
+      "expected_customer_growth": 130.17,
+      "robustness": "high",
+      "robust_utility": 0.338559
+    }
+  ],
+  "selected_strategy": "aggressive_growth",
+  "selection_reason": "Selected aggressive_growth among 4/4 survival-eligible strategies: bankruptcy probability 0.000 is at or below 0.100; highest downside-adjusted utility 0.347936, p10 cash 643833.39."
+}

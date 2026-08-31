@@ -1,0 +1,45 @@
+.env
+.env.local
+.env.*.local
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+dist/
+build/
+node_modules/
+frontend/dist/
+*.egg-info/
+.DS_Store
+external/ceobench-dev/
+artifacts/
+
+# Keep project notes and generated documentation local. The root README is the
+# only Markdown file published from this repository.
+*.md
+!/README.md
+
+# Local tooling and backups
+.claude/
+.local-backups/
+.mcp.json
+.pytest-tmp-v4/
+.tmp-codex/
+.tmp-test/
+
+# Private project notes and submission drafts
+/business-feasibility.md
+/checklist.md
+/prd.md
+/blog/
+*.pre-humanizer.*
+
+# Local design references and generated media
+/Screenshot_*.png
+/*mock.*
+/greenicon.svg
+/assets/hero/
+/frontend/src/tests/__shot.test.tsx

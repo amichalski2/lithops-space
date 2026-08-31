@@ -1,0 +1,13 @@
+{
+  "name": "lithops-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "frontend:dev": "npm --workspace @lithops/cockpit run dev",
+    "frontend:build": "npm --workspace @lithops/cockpit run build",
+    "frontend:test": "npm --workspace @lithops/cockpit run test",
+    "frontend:generate-api": "npm --workspace @lithops/cockpit run generate:api"
+  }
+}

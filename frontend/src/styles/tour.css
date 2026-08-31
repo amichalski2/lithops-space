@@ -1,0 +1,113 @@
+/* ==========================================================================
+   Guided tour overlay.
+
+   The spotlight is one element: a transparent box with a viewport-sized shadow, so the panel
+   underneath shows through untouched instead of being redrawn on a higher layer. A shadow is
+   painted rather than hit-tested, though, which is why `.tour-block` sits under it to swallow
+   clicks — without it the dimmed cockpit would still be fully interactive.
+   ========================================================================== */
+.tour { position: fixed; inset: 0; z-index: 90; }
+.tour-block { position: absolute; inset: 0; }
+
+.tour-spotlight {
+  position: absolute;
+  border-radius: 26px;
+  border: 1px solid #8fd0ff8f;
+  box-shadow:
+    0 0 0 9999px #030811d1,
+    0 0 34px -4px #5cc0ff5c,
+    inset 0 0 24px -8px #5cc0ff66;
+  pointer-events: none;
+  transition: top 0.28s cubic-bezier(0.4, 0, 0.2, 1), left 0.28s cubic-bezier(0.4, 0, 0.2, 1),
+    width 0.28s cubic-bezier(0.4, 0, 0.2, 1), height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tour-card {
+  position: absolute;
+  width: 340px;
+  padding: 18px 19px 15px;
+  border: 1px solid #8ec6f34d;
+  border-radius: 18px;
+  background: linear-gradient(157deg, #14324c 0%, #091825 62%, #071523 100%);
+  box-shadow: 0 30px 70px -28px #000811, inset 0 1px 0 #ffffff2e;
+  outline: none;
+  transition: top 0.28s cubic-bezier(0.4, 0, 0.2, 1), left 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.tour-card:focus-visible { border-color: #a8dcff; }
+
+.tour-eyebrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  color: #5cc0ff;
+  font: 600 11px var(--text);
+  letter-spacing: normal;
+}
+.tour-eyebrow span { color: #6d8ba6; font-weight: 500; letter-spacing: normal; }
+.tour-card h2 {
+  margin: 11px 0 0;
+  color: #e8f2fc;
+  font: 600 16px var(--display);
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+.tour-body { margin: 9px 0 0; color: #a8bed3; font-size: 12px; line-height: 1.62; }
+
+.tour-actions { display: flex; align-items: center; gap: 8px; margin-top: 17px; }
+.tour-skip {
+  margin-right: auto;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #6d8ba6;
+  font: 500 11px var(--text);
+  letter-spacing: normal;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.tour-skip:hover { color: #a8bed3; }
+.tour .ghost { padding: 8px 13px; font-size: 9px; }
+.tour-next {
+  padding: 9px 17px;
+  border: 1px solid #8fd0ff5c;
+  border-radius: 999px;
+  background: linear-gradient(150deg, #ffffff1c, #2c78b83d);
+  color: #e8f2fc;
+  font: 600 10px var(--display);
+  letter-spacing: normal;
+  box-shadow: inset 0 1px 0 #ffffff33, 0 14px 30px -20px #5cc0ff;
+  transition: 0.18s ease;
+}
+.tour-next:hover { border-color: #a8dcff8f; background: linear-gradient(150deg, #ffffff2b, #3d8fd44d); }
+
+.tour-dots { display: flex; gap: 5px; margin: 14px 0 0; padding: 0; list-style: none; }
+.tour-dots li { width: 100%; height: 2px; border-radius: 999px; background: #ffffff1a; }
+.tour-dots li.is-current { background: #5cc0ff; box-shadow: 0 0 8px #5cc0ff8c; }
+
+/* Re-entry point once the tour has been dismissed. Pinned to the shell, not to a panel, so it
+   never lands inside a spotlight it would be covering. */
+.tour-launch {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 40;
+  width: 34px;
+  height: 34px;
+  border: 1px solid #6fb4ea3d;
+  border-radius: 50%;
+  background: linear-gradient(150deg, #86ccff2e, #17497826);
+  color: #93aec6;
+  font: 600 13px var(--display);
+  transition: 0.18s ease;
+}
+.tour-launch:hover { border-color: #8fd0ff8f; color: #5cc0ff; }
+
+@media (max-width: 760px) {
+  .tour-card { width: min(340px, calc(100vw - 28px)); }
+  .tour-launch { right: 14px; bottom: 14px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tour-spotlight, .tour-card { transition: none; }
+}

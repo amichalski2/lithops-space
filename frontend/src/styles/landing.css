@@ -1,0 +1,74 @@
+/* The one-pager that fronts the product. It owns a whole viewport and never scrolls, so every
+   size here is viewport-relative and the shell's fixed-width column is deliberately bypassed. */
+
+.landing {
+  --gold:#e9be63; --gold-bright:#f6d891; --ink:#f2f5fa;
+  /* Where the dent sits inside bg-hero.webp, measured from the image itself (local-variance scan
+     for the blurred-but-lit funnel mouth). Because .landing-scene carries the image's exact aspect
+     ratio, these are image coordinates and hold at every viewport — no per-breakpoint retuning. */
+  --dent-x:54%; --dent-y:45%; --render-w:36%;
+  /* How much of the scene is visible, and which part. Zoom must exceed 1 so panning has slack. */
+  --scene-zoom:1.25; --scene-pan-x:8%; --scene-pan-y:8%;
+  /* The stack chips are infrastructure credits, not brand: neutral, so the gold stays on the CTA. */
+  --chip-ink:#9db0c7; --chip-line:#2a3b50; --chip-fill:#ffffff09;
+  position:relative; z-index:1; display:grid; grid-template-rows:auto 1fr auto; gap:clamp(18px,2.6vh,34px);
+  width:100%; height:100vh; height:100dvh; overflow:hidden;
+  padding:clamp(20px,2.8vh,34px) clamp(22px,4vw,68px) clamp(18px,2.6vh,30px);
+  background:#050b14;
+  color:var(--ink);
+}
+/* The cockpit's fixed graph-paper overlay would fight the honeycomb, so the landing suppresses it. */
+body:has(.landing)::before { display:none; }
+
+
+.landing-backdrop { position:absolute; inset:0; overflow:hidden; z-index:0; }
+/* One box with the background's own 1920:1072 aspect. Sizing it to max(viewport-width,
+   viewport-height x aspect) reproduces object-fit:cover, and the zoom multiplier then buys the
+   overflow that panning spends. The render lives inside it, so it is glued to the dent. */
+.landing-scene { position:absolute; left:calc(50% + var(--scene-pan-x)); top:calc(50% + var(--scene-pan-y)); translate:-50% -50%; width:calc(max(100vw,100vh * 1920 / 1072) * var(--scene-zoom)); aspect-ratio:1920 / 1072; }
+.landing-bg { display:block; width:100%; height:100%; }
+.landing-render { position:absolute; left:var(--dent-x); top:var(--dent-y); translate:-50% -50%; width:var(--render-w); height:auto; filter:drop-shadow(0 34px 78px #02060be6); }
+/* Scrims sit above the imagery but below the copy: heavy on the left for legibility, light on the
+   right so the render keeps its contrast. */
+.landing-backdrop::after { content:""; position:absolute; inset:0; background:linear-gradient(97deg,#04080ff5 0%,#04080fdb 26%,#04080f70 48%,#04080f14 68%,#04080f4d 100%),radial-gradient(130% 110% at 58% 46%,transparent 38%,#04080fb8 100%); }
+
+.landing-brand { position:relative; z-index:1; display:flex; align-items:center; gap:12px; font-family:var(--display); color:var(--gold); font-weight:700; font-size:clamp(19px,min(1.8vw,3.6vh),32px); letter-spacing:-.01em; }
+.landing-brand-mark { height:clamp(30px,min(3vw,6vh),52px); width:auto; display:block; flex:none; }
+
+.landing-stage { position:relative; z-index:1; display:grid; align-items:center; min-height:0; }
+
+.landing-copy { max-width:min(36vw,760px); }
+/* An eyebrow, not a second title: it names the category so the H1 can carry the claim, and it
+   stays neutral so the only gold left in this column is the CTA. */
+.landing-kicker { margin:0; font-family:var(--display); color:var(--chip-ink); font-weight:600; font-size:clamp(11px,.92vw,14px); line-height:1.2; letter-spacing:normal; }
+/* Balanced wrapping instead of a hand-placed <br>: the headline keeps even lines at every
+   viewport, so editing the copy cannot leave a one-word last line. */
+.landing-copy h1 { margin:clamp(12px,1.6vh,20px) 0 0; font-family:var(--display); font-size:clamp(26px,min(2.9vw,6.1vh),62px); font-weight:700; line-height:1.06; letter-spacing:-.02em; text-wrap:balance; }
+.landing-lede { margin:clamp(16px,2.4vh,28px) 0 0; max-width:34em; color:#9fb0c6; font-size:clamp(15px,min(1.12vw,2.3vh),22px); line-height:1.6; }
+
+.landing-actions { display:flex; flex-wrap:wrap; gap:14px; margin-top:clamp(20px,3vh,36px); }
+.pill { display:inline-flex; align-items:center; gap:10px; padding:clamp(13px,1.6vh,18px) clamp(26px,2.2vw,34px); border-radius:999px; font-size:clamp(13px,min(1.02vw,2.1vh),18px); font-weight:600; letter-spacing:.01em; transition:.18s ease; }
+.pill i { font-style:normal; font-size:.9em; }
+.pill:disabled { cursor:not-allowed; opacity:.55; }
+.pill-solid { border:1px solid var(--gold); background:linear-gradient(180deg,var(--gold-bright),var(--gold)); color:#0a1220; }
+.pill-solid:hover:not(:disabled) { transform:translateY(-1px); box-shadow:0 10px 34px #e9be6340; }
+.pill-ghost { border:1px solid #e9be6366; background:transparent; color:var(--ink); }
+.pill-ghost:hover:not(:disabled) { border-color:var(--gold); color:var(--gold-bright); }
+
+
+.landing-stack { position:relative; z-index:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px 14px; font-family:var(--display); padding-top:clamp(12px,1.8vh,20px); border-top:1px solid #ffffff0f; }
+.landing-stack>span { color:#7f93ab; font-weight:500; font-size:clamp(10px,.85vw,13px); letter-spacing:normal; }
+.landing-stack ul { display:flex; flex-wrap:wrap; gap:8px; margin:0; padding:0; list-style:none; }
+.landing-stack li { padding:6px 11px; border:1px solid var(--chip-line); border-radius:0; background:var(--chip-fill); color:var(--chip-ink); font-weight:500; font-size:clamp(10px,.82vw,12px); line-height:1.4; letter-spacing:.03em; white-space:nowrap; }
+
+/* Under two columns the render becomes a backdrop rather than a sibling, so the copy keeps the fold. */
+@media (max-width:900px) {
+  /* One column: the render slides behind the copy and dims, rather than sharing the fold. */
+  .landing { --scene-zoom:1.9; --scene-pan-x:0%; --scene-pan-y:6%; }
+  .landing-render { opacity:.38; }
+  .landing-copy { max-width:none; }
+  .landing-copy h1 { font-size:clamp(26px,6.6vw,40px); }
+}
+@media (max-height:620px) {
+  .landing-lede { display:none; }
+}

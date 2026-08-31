@@ -1,0 +1,457 @@
+/* ==========================================================================
+   Simulation cockpit — the furniture that only this view has.
+
+   Tokens, glass surfaces, badges, pills and parameter rows live in hud.css; the cockpit carries
+   `.hud` alongside `.cockpit`. What remains here is the grid, the stage, the day axis, the
+   transport and the three panel bodies.
+   ========================================================================== */
+/* Cockpit shell ---------------------------------------------------------- */
+.cockpit-grid {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 24px;
+  /* A cockpit holds on one screen; panels scroll inside instead of the page scrolling. */
+  height: calc(100vh - 128px);
+  min-height: 740px;
+  grid-template-columns: minmax(250px, 320px) minmax(0, 1fr) minmax(310px, 390px);
+  grid-template-rows: minmax(0, 1.55fr) minmax(0, 1fr) minmax(180px, 232px);
+  grid-template-areas:
+    "company stage model"
+    "company stage decisions"
+    "logs    logs  logs";
+}
+.area-company { grid-area: company; }
+.area-stage { grid-area: stage; }
+.area-model { grid-area: model; }
+.area-decisions { grid-area: decisions; }
+.area-logs { grid-area: logs; }
+.cockpit-grid > div { min-width: 0; min-height: 0; display: flex; }
+.cockpit-grid > div > section { width: 100%; }
+
+/* The cockpit's three containers are glass panels; the recipe lives in hud.css. */
+.hud .side-panel,
+.hud .stage,
+.hud .logs-panel {
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius);
+  background: var(--glass);
+  box-shadow: var(--panel-shadow);
+  backdrop-filter: blur(16px) saturate(125%);
+}
+.side-panel {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 18px;
+}
+.side-panel > header { flex: none; }
+.model-panel, .metric-stack { overflow-y: auto; }
+.side-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 4px 14px;
+  border-bottom: 1px solid var(--glass-line);
+}
+.side-panel > header > span {
+  color: var(--ink-dim);
+  font: 500 10px var(--text);
+  letter-spacing: normal;
+}
+/* Company status --------------------------------------------------------- */
+.metric-stack { display: flex; flex-direction: column; gap: 9px; flex: 1; min-height: 0; padding: 13px 2px 2px; }
+.cockpit .metric-stack .metric {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0 12px;
+  min-height: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius-tile);
+  background: var(--tile);
+  box-shadow: inset 0 1px 0 #ffffff17;
+  transition: border-color 0.18s ease, background 0.18s ease;
+}
+.cockpit .metric-stack .metric:hover { border-color: var(--tile-hover); }
+.cockpit .metric-stack .metric .hud-badge { grid-area: 1 / 1 / 3 / 2; }
+.cockpit .metric-stack .metric > span {
+  grid-area: 1 / 2 / 2 / 3;
+  color: var(--ink-dim);
+  font: 500 11px var(--text);
+  letter-spacing: normal;
+  text-transform: none;
+}
+.cockpit .metric-stack .metric strong {
+  grid-area: 2 / 2 / 3 / 3;
+  margin: 2px 0 0;
+  color: var(--ink);
+  font: 600 clamp(17px, 1.55vw, 22px) var(--display);
+  letter-spacing: -0.01em;
+}
+.cockpit .metric-stack .metric small {
+  grid-area: 1 / 3 / 3 / 4;
+  padding: 4px 8px;
+  border: 1px solid var(--tile-line);
+  border-radius: 999px;
+  color: var(--ink-dim);
+  font: 500 9px var(--text);
+  letter-spacing: normal;
+}
+.metric-aside { grid-area: 1 / 3 / 3 / 4; display: flex; align-items: center; width: 92px; }
+.cockpit .metric-danger strong { color: var(--danger); }
+.cockpit .metric-danger small { border-color: #ff6b5b4d; color: var(--danger); }
+.cockpit .metric-warning strong { color: var(--warning); }
+.cockpit .metric-warning small { border-color: #f5a5244d; color: var(--warning); }
+.metric-acid strong { color: var(--accent); }
+
+.sparkline { width: 100%; height: 30px; overflow: visible; }
+.sparkline-line { fill: none; stroke: var(--accent); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 5px #5cc0ff88); }
+.sparkline-area { fill: #5cc0ff1f; stroke: none; }
+.sparkline-head { fill: var(--accent); stroke: none; }
+.sparkline.is-falling .sparkline-line { stroke: var(--warning); filter: none; }
+.sparkline.is-falling .sparkline-area { fill: #f5a5241a; }
+.sparkline.is-falling .sparkline-head { fill: var(--warning); }
+
+/* Stage: clock, mark, progress ring --------------------------------------- */
+.stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 0;
+  gap: 14px;
+  padding: 18px;
+}
+/* The inner card is what the eye lands on first, so it sits one step brighter than the panel. */
+.stage-core {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 0;
+  padding: 18px 20px 22px;
+  border: 1px solid var(--tile-line);
+  border-radius: 18px;
+  background: linear-gradient(168deg, #4a9ad81f, #0a1c2ecc);
+  box-shadow: inset 0 1px 0 #ffffff1f;
+}
+
+.stage-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #9fd0f0;
+  font: 500 11px var(--text);
+  letter-spacing: normal;
+}
+.stage-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  margin: 6px 0 0;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+.stage-day .day-value { font-size: clamp(34px, 3.6vw, 54px); color: var(--ink); animation: dayTick 0.12s ease-out; }
+.stage-day .day-value em { color: var(--accent); font-style: normal; text-shadow: 0 0 26px #5cc0ff5c; }
+.stage-day small { color: #56789a; font: 500 12px var(--mono); letter-spacing: normal; }
+
+.stage-orb {
+  position: relative;
+  display: grid;
+  flex: 1 1 auto;
+  place-items: center;
+  min-height: 136px;
+  max-height: 264px;
+  margin: 6px 0 2px;
+  aspect-ratio: 1;
+}
+.stage-orb::before {
+  position: absolute;
+  inset: 6%;
+  content: "";
+  border-radius: 50%;
+  background: radial-gradient(circle, #3f9ee066 0%, #1d5c9629 46%, transparent 70%);
+}
+.orb-ring { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; transform: rotate(-90deg); }
+/* The dashed track is the tick scale as well as the rail, so progress needs no separate legend. */
+.orb-track { fill: none; stroke: #7cc0f23d; stroke-width: 3; stroke-dasharray: 1.5 9; stroke-linecap: round; }
+.orb-progress {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 4.5;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 9px #5cc0ffb3);
+  /* No transition: the arc is repainted every frame from the clock. A CSS transition here gets
+     re-targeted faster than it can finish at 2x and 4x, so the arc crawls and looks frozen. */
+}
+
+.stage-mark { position: absolute; inset: 12%; display: grid; place-items: center; }
+/* The render is dark navy on a dark stage, so it needs its own lift to separate from the ring. */
+.cockpit .stage-mark .mark {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 10px 24px #00060fa8) drop-shadow(0 0 20px #2f8ad23d);
+}
+.stage-mark::before,
+.stage-mark::after {
+  position: absolute;
+  top: 50%;
+  width: 34px;
+  height: 1px;
+  content: "";
+  opacity: 0;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+.stage-mark::before { right: 100%; margin-right: 8px; }
+.stage-mark::after { left: 100%; margin-left: 8px; transform: scaleX(-1); }
+.stage-mark.is-flying::before,
+.stage-mark.is-flying::after { animation: fly var(--fly-duration, 0.6s) linear infinite; }
+.stage-mark.is-flying .mark { animation: markPulse var(--fly-duration, 0.6s) ease-in-out infinite; }
+
+.stage-confidence {
+  margin: 2px 0 0;
+  color: var(--ink-dim);
+  font: 500 11px var(--text);
+  letter-spacing: normal;
+}
+.stage-confidence em { color: var(--accent); font-style: normal; font-size: 12px; font-weight: 600; }
+
+/* Day axis --------------------------------------------------------------- */
+/* The scrubber is the one element the mock-up has no slot for, so it gets its own inset well
+   rather than floating on bare glass between the stage card and the transport. */
+.day-axis {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+  outline: none;
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius-tile);
+  background: #0a1c2e66;
+}
+.day-axis:focus-visible { outline: 1px solid var(--accent); outline-offset: 4px; }
+.day-axis .lane-rule { stroke: #16283a; stroke-width: 1; }
+.day-axis .lane-label { fill: #47637d; font: 500 7px var(--mono); letter-spacing: normal; }
+.day-axis .baseline { stroke: #2a445e; stroke-width: 1; }
+.day-axis .baseline-done { stroke: var(--accent-dim); stroke-width: 1; }
+.day-axis .tick { stroke: #21354a; stroke-width: 1; }
+.day-axis .tick-label { fill: #47637d; font: 400 7px var(--mono); text-anchor: middle; }
+.day-axis .week-notch { stroke: #4d6c8a; stroke-width: 1; }
+.day-axis .frontier { stroke: #35597e; stroke-width: 1; stroke-dasharray: 2 4; }
+
+.day-axis .marker { transition: none; }
+.day-axis .marker-pending { fill: none; stroke: #57768f; stroke-width: 1.2; }
+.day-axis .marker-hit { fill: var(--positive); stroke: none; animation: markerPop 0.28s ease-out; }
+.day-axis .marker-miss { fill: var(--danger); stroke: none; animation: markerPop 0.28s ease-out; }
+.day-axis .marker-awaiting {
+  fill: none;
+  stroke: var(--warning);
+  stroke-width: 1.4;
+  animation: markerWait 1.4s ease-in-out infinite;
+}
+.day-axis .playhead line { stroke: var(--accent); stroke-width: 1; filter: drop-shadow(0 0 6px var(--accent)); }
+.day-axis .playhead polygon { fill: var(--accent); }
+.day-axis .scrub-surface { fill: transparent; cursor: ew-resize; touch-action: none; }
+
+/* Transport -------------------------------------------------------------- */
+.transport {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+}
+/* The transport's primary is the widest control in the row; a floor keeps the row from reflowing
+   as the label changes between "Run simulation", "Pause" and "Replay from day 0". */
+.run-button { min-width: 218px; }
+.run-glyph {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid #9ad7ff66;
+  border-radius: 50%;
+  background: #86c9ff21;
+  color: var(--accent);
+}
+.run-glyph svg { width: 15px; height: 15px; }
+
+
+.mode-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 13px;
+  border: 1px solid var(--tile-line);
+  border-radius: 999px;
+  background: var(--tile);
+  font: 500 11px var(--text);
+  letter-spacing: normal;
+}
+.mode-live { border-color: #56d9a655; color: var(--positive); }
+.mode-live .status-icon { width: 14px; height: 14px; animation: livePulse 1.6s ease-in-out infinite; }
+.mode-replay { color: var(--ink-dim); }
+.go-live { border: 0; background: none; color: var(--accent); font: inherit; padding: 0 0 0 4px; }
+
+/* World model panel ------------------------------------------------------ */
+.model-panel.is-challenged { border-color: #ff6b5b66; }
+.model-panel.is-challenged > header .eyebrow { color: var(--danger) !important; }
+.sync-note { margin: 12px 0 0; color: #55738f; font: 400 11px var(--text); }
+
+
+.challenge { margin: 12px 0; padding: 12px; border: 1px solid #ff6b5b55; border-radius: var(--radius-tile); background: #ff6b5b12; }
+.challenge-head { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 11px; }
+.challenge-pulse { width: 17px; height: 17px; animation: challengePulse 1.8s ease-in-out infinite; }
+.challenge-head p { margin: 0 0 3px; color: var(--danger); font: 600 11px var(--text); letter-spacing: normal; }
+.challenge-head strong { color: #c8d3de; font-size: 11px; font-weight: 500; }
+.challenge-head > b { grid-column: 2; color: var(--danger); font: 500 10px var(--text); letter-spacing: normal; }
+.challenge-triggers { display: flex; flex-wrap: wrap; gap: 5px; margin: 9px 0; }
+.challenge-triggers span { padding: 5px 8px; border: 1px solid #ff6b5b33; border-radius: 999px; color: #dda396; font: 500 10px var(--text); }
+.horizon-table { width: 100%; border-collapse: collapse; }
+.horizon-table th { padding: 4px; color: #64809a; font: 500 9px var(--text); text-align: right; letter-spacing: normal; }
+.horizon-table th:first-child, .horizon-table td:first-child { text-align: left; }
+.horizon-table td { padding: 4px; color: #adbccd; font: 400 9px var(--mono); text-align: right; border-top: 1px solid #ffffff0f; }
+.horizon-table .coverage-low { color: var(--danger); }
+
+
+/* Decisions list --------------------------------------------------------- */
+.decision-list { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; margin: 0; padding: 13px 2px 2px; list-style: none; overflow-y: auto; }
+.cockpit .decision-list li { border-bottom: 0; }
+.cockpit .decision-list a {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--tile-line);
+  border-radius: var(--radius-tile);
+  background: var(--tile);
+  box-shadow: inset 0 1px 0 #ffffff17;
+  color: inherit;
+  text-decoration: none;
+  transition: 0.15s ease;
+}
+.cockpit .decision-list a:hover { border-color: var(--tile-hover); background: linear-gradient(158deg, #3d8fd133, #0d2135b3); }
+.cockpit .decision-list li.is-active a { border-color: #7cc4ff5e; box-shadow: inset 0 1px 0 #ffffff26, 0 0 0 1px #5cc0ff1f; }
+/* The week chip is the row's address — a badge, so scanning down the list is scanning one column. */
+.cockpit .decision-list b {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 34px;
+  border: 1px solid #6cbcf24d;
+  border-radius: 10px;
+  background: linear-gradient(150deg, #86ccff2e, #17497826);
+  color: var(--accent);
+  font: 600 12px var(--text);
+}
+.cockpit .decision-list strong { display: block; color: var(--ink); font: 500 11px var(--text); letter-spacing: 0.01em; }
+.cockpit .decision-list small { color: #6d8ba6; font: 400 10px var(--text); }
+
+/* Logs ------------------------------------------------------------------- */
+.logs-panel { display: flex; flex-direction: column; padding: 16px 18px; }
+.logs-panel > header {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px 12px;
+  border-bottom: 1px solid var(--glass-line);
+}
+.logs-panel > header span { color: var(--ink-dim); font: 500 10px var(--text); letter-spacing: normal; }
+.log-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  column-gap: 28px;
+  margin: 0;
+  padding: 6px 0 0;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  list-style: none;
+  scroll-behavior: smooth;
+}
+.log-list li {
+  display: grid;
+  grid-template-columns: 34px 10px 1fr;
+  align-items: baseline;
+  gap: 3px 10px;
+  padding: 8px 0;
+  border-top: 1px solid #ffffff0d;
+}
+.log-list time { grid-row: 1 / 3; color: #4a6a86; font: 400 8px var(--mono); }
+.log-list .event-node { grid-row: 1 / 3; width: 7px; height: 7px; border: 1px solid #52718c; border-radius: 50%; }
+.log-list small { color: #5d7a94; font: 500 9px var(--text); letter-spacing: normal; }
+.log-list strong { grid-column: 3; color: #cbd8e5; font: 500 11px var(--text); }
+.log-list p { grid-column: 3; margin: 3px 0 0; color: var(--ink-dim); font-size: 10px; }
+.event-model_health-evaluated, .event-world_model-updated, .event-world_model-created,
+.event-decision-prepared { border-color: var(--accent) !important; box-shadow: 0 0 7px #5cc0ff66; }
+.event-prediction-matured { border-color: var(--warning) !important; }
+.event-run-failed { border-color: var(--danger) !important; }
+
+.terminal-state {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 18px;
+  padding: 14px 18px;
+  border: 1px solid #56d9a655;
+  background: #56d9a60f;
+  color: var(--positive);
+}
+.terminal-state strong, .failure-state span, .terminal-state span {
+  font: 500 11px var(--text);
+  letter-spacing: normal;
+}
+
+/* Motion ----------------------------------------------------------------- */
+@keyframes fly { from { transform: translateX(0); opacity: 0; } 40% { opacity: 1; } to { transform: translateX(-22px); opacity: 0; } }
+@keyframes markPulse { 50% { filter: drop-shadow(0 0 18px #5cc0ff7a); } }
+@keyframes dayTick { from { transform: translateY(5px); opacity: 0.3; } }
+@keyframes markerPop { from { transform: scale(2.4); opacity: 0.2; } }
+@keyframes markerWait { 50% { opacity: 0.35; } }
+@keyframes livePulse { 50% { opacity: 0.4; } }
+@keyframes challengePulse { 50% { transform: scale(1.12); } }
+
+@media (max-width: 1240px) {
+  .cockpit-grid {
+    height: auto;
+    min-height: 0;
+    grid-template-rows: none;
+    grid-template-columns: minmax(0, 1fr) minmax(270px, 350px);
+    grid-template-areas:
+      "stage   model"
+      "stage   decisions"
+      "company company"
+      "logs    logs";
+  }
+  .stage-orb { max-height: 210px; }
+}
+@media (max-width: 860px) {
+  .cockpit-grid {
+    height: auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "stage" "model" "decisions" "company" "logs";
+  }
+  .stage { padding: 14px; }
+  .transport { justify-content: stretch; }
+  .run-button { flex: 1 1 100%; justify-content: center; }
+  .metric-aside { width: 68px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .stage-mark.is-flying::before, .stage-mark.is-flying::after,
+  .stage-mark.is-flying .mark, .stage-day .day-value, .day-axis .marker,
+  .mode-live .status-icon, .challenge-pulse { animation: none !important; }
+}

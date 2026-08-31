@@ -1,0 +1,31 @@
+# Files excluded from `gcloud run deploy --source .`. Everything copied by the
+# root Dockerfile must remain in the build context.
+.git
+.github
+.claude
+.local-backups
+.mcp.json
+.venv
+.venv-win
+node_modules
+frontend/node_modules
+frontend/dist
+__pycache__
+*.py[cod]
+.pytest_cache
+.pytest-tmp-v4
+.ruff_cache
+.tmp-codex
+.tmp-test
+artifacts
+blog
+external
+docs
+deploy
+infra
+scripts
+backend/tests
+.env
+.env.*
+Screenshot_*.png
+*mock.*

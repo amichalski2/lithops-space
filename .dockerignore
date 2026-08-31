@@ -1,0 +1,31 @@
+.git
+.github
+.claude
+.local-backups
+.mcp.json
+.venv
+.venv-win
+.pytest_cache
+.pytest-tmp-v4
+.ruff_cache
+.tmp-codex
+.tmp-test
+__pycache__
+*.py[cod]
+node_modules
+frontend/node_modules
+frontend/dist
+external
+artifacts
+blog
+docs
+infra
+scripts
+tests
+backend/tests
+.env
+.env.*
+*.md
+!README.md
+# Keep the root package manifests because the frontend build stage installs
+# its workspace dependencies from them.

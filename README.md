@@ -8,7 +8,7 @@
 
 Gemini decides the strategy every simulated week; deterministic, hand-written code controls what it sees, prices its options, vetoes insolvency, and records everything it does.
 
-[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![Python](https://img.shields.io/badge/Python-3.12--3.13-3776AB?logo=python&logoColor=white)](pyproject.toml)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](backend/src/lithops/api/main.py)
 [![React](https://img.shields.io/badge/React-20232a?logo=react&logoColor=61DAFB)](frontend/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](frontend/)
@@ -47,14 +47,14 @@ A full run costs $5-40 of Gemini inference (depending on how much world-model au
 
 ### How one week works
 
-1. Normalize the latest observation (unit registry; missing data is *missing*, never zero).
+1. Normalize the latest observation. Period conversions are explicit (a monthly price never silently enters a weekly equation), and a metric the environment omits stays `None` through the type layer; the CEO-Bench adapter falls back to labelled initial estimates and records which fields it estimated.
 2. Score every forecast whose outcome has now arrived.
-3. Update the active world model and check its health.
-4. Ask the Executive for bounded strategy candidates; simulate them with common random numbers, next to a no-op.
-5. Veto insolvency, name every other risk on the candidate's evaluation card, and let the Executive choose. Deterministic code vetoes and informs; the model decides.
-6. Commit forecasts, model hashes and an idempotency key *before* acting, then execute through the gateway and store receipts.
+3. Update the active world model, and evaluate its health whenever newly matured outcomes are attributable to it.
+4. Ask the Executive for bounded strategy candidates; simulate them with common random numbers, next to a no-op continuation baseline.
+5. Gate candidates on insolvency risk relative to that baseline (with a fallback when every card fails the gate), name every other risk on the evaluation card, and let the Executive choose among eligible cards. Deterministic code vetoes and informs; the model decides.
+6. Commit forecasts, model hashes and an idempotency key *before* acting, then execute through the benchmark port and store receipts.
 
-When prediction quality degrades, scoped coding agents propose replacement model components. Candidate code runs in a sandbox and must beat the current champion in expanding-window temporal backtests before promotion. The old hand-written simulator was never deleted; it lives in the registry as `fixed-baseline-v1`, the opponent every candidate has to beat.
+When prediction quality degrades, scoped coding agents propose replacement model components. Candidate code runs in a sandbox and is judged in expanding-window temporal backtests: a full model must beat both the champion and the baseline by a clear margin; a single component must improve its own predictions without degrading the whole. The old hand-written simulator was never deleted; it lives in the registry as `fixed-baseline-v12`, the reference every candidate is scored against.
 
 ## Quickstart (no keys required)
 
@@ -80,7 +80,7 @@ curl -s http://localhost:8000/runs/$RUN/decisions
 curl -s http://localhost:8000/runs/$RUN/predictions
 ```
 
-Replaying the same `Idempotency-Key` returns the stored result instead of acting twice. That property holds everywhere in the system.
+The `Idempotency-Key` header is required on `step`; replaying the same key returns the stored result instead of acting twice. That property holds everywhere in the system.
 
 ## Run it with real models
 
@@ -98,7 +98,7 @@ SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_SECRET_KEY=your-server-only-secret
 ```
 
-OpenRouter (`LITHOPS_MODEL_PROVIDER=openrouter`) and fal.ai are also wired for cross-model comparisons. Keys stay on the server; nothing reaches the browser.
+OpenRouter and fal.ai were used during development for cross-model experimentation; the headline runs used Gemini. Keys stay on the server; nothing reaches the browser.
 
 To run a full checkpointed CEO-Bench experiment (CEO-Bench itself is an external distribution, not vendored here):
 
@@ -178,10 +178,10 @@ class MyCompanyAdapter:
 Three rules we learned the expensive way:
 
 1. **Missing is not zero.** If an instrument can't measure something, report `None` or raise - a silent `0.0` reads as knowledge and will steer a year of decisions.
-2. **Declare units.** The observation adapter has a unit registry; a monthly price entering a weekly equation without an explicit conversion is a contract violation, not a rounding detail.
+2. **Declare units.** Period conversions are explicit (`PeriodicMoney` in [`backend/src/lithops/domain/economics.py`](backend/src/lithops/domain/economics.py)), and generated model code declares a unit per feature; a monthly price entering a weekly equation without an explicit conversion is a contract violation, not a rounding detail.
 3. **The action and observation layers must agree on reality.** Whatever `execute_action` changes must be visible in the next `observe_status`. Our worst bug was spend that executed with receipts and never appeared in observations.
 
-Use [`backend/src/lithops/benchmark/fake.py`](backend/src/lithops/benchmark/fake.py) (185 lines) as the reference implementation and [`backend/tests/contract/`](backend/tests/contract/) as the safety net - the contract tests run an adapter against the same expectations the CEO-Bench one has to meet. Wire yours in where `LITHOPS_BENCHMARK_BACKEND` selects the adapter (`backend/src/lithops/api/main.py`).
+Use [`backend/src/lithops/benchmark/fake.py`](backend/src/lithops/benchmark/fake.py) (185 lines) as the starting point - it implements five of the six methods (`collect_weekly_evidence` is optional; the loop probes for it) - and [`backend/tests/contract/`](backend/tests/contract/) as the safety net. `LITHOPS_BENCHMARK_BACKEND` is read in [`backend/src/lithops/config.py`](backend/src/lithops/config.py) and the adapter is instantiated in [`backend/src/lithops/api/main.py`](backend/src/lithops/api/main.py); wire yours in there.
 
 ## Deploy on Google Cloud
 

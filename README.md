@@ -1,18 +1,51 @@
+<div align="center">
+
+<img src="frontend/public/logo.png" alt="Lithops logo" width="140"/>
+
 # Lithops
 
-An autonomous operating agent for running a company over a long horizon. Gemini decides the strategy every simulated week; deterministic, hand-written code controls what it sees, prices its options, vetoes insolvency, and records everything it does. The model of the company is code: small, versioned Python modules that a coding agent writes from observed history and that must beat a boring baseline in temporal backtests before they touch a decision about money.
+**An autonomous operating agent for running a company over a long horizon.**
+
+Gemini decides the strategy every simulated week; deterministic, hand-written code controls what it sees, prices its options, vetoes insolvency, and records everything it does.
+
+[![Python](https://img.shields.io/badge/Python-3.12%2B-3776AB?logo=python&logoColor=white)](pyproject.toml)
+[![FastAPI](https://img.shields.io/badge/FastAPI-009688?logo=fastapi&logoColor=white)](backend/src/lithops/api/main.py)
+[![React](https://img.shields.io/badge/React-20232a?logo=react&logoColor=61DAFB)](frontend/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](frontend/)
+[![Gemini](https://img.shields.io/badge/Gemini%203.7%20Flash-8E75B2?logo=googlegemini&logoColor=white)](#run-it-with-real-models)
+[![Google ADK](https://img.shields.io/badge/Google%20ADK-4285F4?logo=google&logoColor=white)](pyproject.toml)
+[![Cloud Run](https://img.shields.io/badge/Cloud%20Run-4285F4?logo=googlecloud&logoColor=white)](#deploy-on-google-cloud)
+
+[![Benchmark](https://img.shields.io/badge/benchmark-CEO--Bench-E8710A)](https://ceobench.com)
+[![Tests](https://img.shields.io/badge/tests-450%2B-brightgreen)](#tests)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+[![Hackathon](https://img.shields.io/badge/All%20Things%20Agentic-Hackathon-FF6F00)](#license)
+
+**[Live replay of a finished 504-day run →](https://lithops.space)** · [Build log / blog post](blog/lithops_blogpost_en.md) · [Architecture](#architecture) · [Bring your own environment](#point-it-at-your-own-company-problem)
+
+</div>
+
+---
+
+The model of the company is code: small, versioned Python modules that a coding agent writes from observed history and that must beat a boring baseline in temporal backtests before they touch a decision about money.
 
 Lithops is environment-agnostic. It ships with an adapter for [CEO-Bench](https://ceobench.com) (a 504-day SaaS-startup simulation from Princeton) and a fake in-memory environment for development, and you can point the same loop at your own business problem by implementing one six-method interface. That's the part this README spends the most time on.
-
-- **Live replay of a finished 504-day run:** [lithops.space](https://lithops.space)
 
 ## Results, honestly stated
 
 On CEO-Bench seed 137, raw Gemini Flash ends its best unassisted run with $75k of the starting $1M, and the previous Flash generation goes bankrupt in all three attempts by day 150. The same model inside Lithops never went bankrupt in any run of the project, preserved most of the capital, and on the final clean run posted the seed's best early game (28 customers by week 12). It did not grow the company: a competitor quality storm around week 36 took the customer base in every attempt, and the model never bought the one R&D lever that jumps the quality bar.
 
+| Three generations of the harness, same seed | The week the growth died |
+| :---: | :---: |
+| ![Three runs of the same seed](blog/viz_three_runs.png) | ![Week 11 decision](blog/viz_week11.png) |
+
 A full run costs $5-40 of Gemini inference (depending on how much world-model authoring it does) and about three hours on a 2 vCPU Cloud Run Job.
 
-## How one week works
+## Architecture
+
+![Lithops agent architecture](blog/lithops_architecture_agents.png)
+
+### How one week works
 
 ```mermaid
 flowchart LR
@@ -167,6 +200,8 @@ Use [`backend/src/lithops/benchmark/fake.py`](backend/src/lithops/benchmark/fake
 
 ## Deploy on Google Cloud
 
+![Lithops system architecture on Google Cloud](blog/lithops_architecture_system.png)
+
 Two paths, both scripted:
 
 - `infra/cloudrun/deploy.sh` - the cockpit + API as one Cloud Run **service** (same-origin SPA + FastAPI; this is what serves [lithops.space](https://lithops.space)).
@@ -208,15 +243,24 @@ npm run frontend:test && npm run frontend:build
 
 ## Repository layout
 
-- `backend/src/lithops/` - domain model, application services, benchmark adapters, API, infrastructure
-- `backend/tests/` - unit, integration, contract, and architecture tests
-- `frontend/` - React cockpit and generated OpenAPI types
-- `deploy/cloudrun/` - autonomous Cloud Run Job deployment
-- `infra/` - Cloud Run service deploy and Supabase migrations
-- `scripts/` - experiment runners and verification commands
+```text
+backend/src/lithops/   domain model, application services, benchmark adapters, API, infrastructure
+backend/tests/         unit, integration, contract, and architecture tests
+frontend/              React cockpit and generated OpenAPI types
+deploy/cloudrun/       autonomous Cloud Run Job deployment
+infra/                 Cloud Run service deploy and Supabase migrations
+scripts/               experiment runners and verification commands
+blog/                  build log, architecture diagrams, run visualizations
+```
 
 ## License
 
 MIT. See [`LICENSE`](LICENSE).
 
-Built for the All Things Agentic Hackathon (Google Cloud + Gemini). #AllThingsAgenticHackathon
+<div align="center">
+
+<img src="frontend/public/logo.png" alt="Lithops" width="48"/>
+
+Built for the **All Things Agentic Hackathon** (Google Cloud + Gemini) · [#AllThingsAgenticHackathon](https://twitter.com/hashtag/AllThingsAgenticHackathon)
+
+</div>

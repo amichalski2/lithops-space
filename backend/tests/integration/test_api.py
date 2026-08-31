@@ -35,24 +35,24 @@ def test_health() -> None:
     assert client.get("/health").json() == {"status": "ok"}
 
 
-def test_cloud_execution_requires_participant_key_without_affecting_read_api() -> None:
+def test_replay_only_deployment_refuses_to_advance_without_affecting_read_api() -> None:
     adapter = FakeBenchmarkAdapter()
     manager = RunManager(
         repository=InMemoryRunRepository(),
         benchmark=adapter,
         decision_engine=StaticDecisionEngine(),
     )
-    client = TestClient(create_app(manager, require_byok=True))
+    client = TestClient(create_app(manager, replay_only=True))
     run_id = client.post("/runs").json()["id"]
 
     assert client.get(f"/runs/{run_id}").status_code == 200
     response = client.post(
         f"/runs/{run_id}/step",
-        headers={"Idempotency-Key": "missing-participant-key"},
+        headers={"Idempotency-Key": "replay-only-step"},
     )
 
-    assert response.status_code == 401
-    assert "Gemini API key is required" in response.json()["detail"]
+    assert response.status_code == 403
+    assert "read-only replay" in response.json()["detail"]
     assert adapter.advance_week_calls == 0
 
 

@@ -1,16 +1,13 @@
 import { useReplay } from "../cockpit/ReplayProvider";
-import { ErrorNotice } from "../../components/ui/ErrorNotice";
 import { compactMoney } from "../../lib/format";
 
 /** Empty, paused, failed and terminal states the PRD requires the cockpit to make explicit. */
 export function RunStatusStrip() {
-  const { data, notice, dismissNotice } = useReplay();
+  const { data } = useReplay();
   const { run, report } = data;
 
   return (
     <>
-      {notice && <ErrorNotice message={notice} onRetry={dismissNotice} />}
-
       {run.status === "failed" && (
         <div className="failure-state">
           <strong>Run failed at safe checkpoint</strong>

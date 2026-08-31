@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, expect, test, vi } from "vitest";
 
 import { STORED_RUN_KEY } from "../features/cockpit/ReplayProvider";
-import { clearGeminiApiKey, getGeminiApiKey } from "../features/runs/byok";
 import { fixtures, installApi, runId } from "../tests/fixtures";
 import { renderAt } from "../tests/render";
 
@@ -11,42 +10,16 @@ beforeEach(() => vi.stubEnv("VITE_DEMO_RUN_ID", ""));
 
 afterEach(() => {
   cleanup();
-  clearGeminiApiKey();
   localStorage.clear();
   vi.unstubAllEnvs();
   vi.restoreAllMocks();
 });
 
-test("requires a participant key before creating a fresh cloud simulation", async () => {
-  installApi(fixtures());
-  const user = userEvent.setup();
+test("offers no launch action when there is no finished run to replay", () => {
   renderAt("/launch");
 
-  const input = screen.getByLabelText("Gemini API key");
-  const submit = screen.getByRole("button", { name: "Start fresh run" });
-  expect(input).toBeEnabled();
-  expect(submit).toBeDisabled();
-
-  const key = "participant-gemini-key-1234567890";
-  await user.type(input, key);
-  await user.click(submit);
-
-  expect(getGeminiApiKey()).toBe(key);
-  expect(await screen.findByRole("region", { name: "Company state" })).toBeInTheDocument();
-});
-
-test("surfaces API failure without persisting the participant key", async () => {
-  vi.spyOn(globalThis, "fetch").mockResolvedValue(
-    new Response("CEO-Bench unavailable", { status: 503 }),
-  );
-  const user = userEvent.setup();
-  renderAt("/launch");
-
-  await user.type(screen.getByLabelText("Gemini API key"), "participant-key-123456789012345");
-  await user.click(screen.getByRole("button", { name: "Start fresh run" }));
-
-  expect(await screen.findByRole("alert")).toHaveTextContent("CEO-Bench unavailable");
-  expect(localStorage.getItem("gemini-api-key")).toBeNull();
+  expect(screen.getByText("No finished run is configured for replay yet.")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Replay best CEO-Bench run/ })).not.toBeInTheDocument();
 });
 
 test("replays the configured evidence run from day zero", async () => {

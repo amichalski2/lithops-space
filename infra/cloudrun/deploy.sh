@@ -2,11 +2,10 @@
 # Deploy the Lithops evidence API to Cloud Run.
 #
 # Persistence secrets are held in Secret Manager and mounted as environment variables.
-# Participant Gemini keys are request-scoped BYOK credentials and are never installed
-# as Cloud Run secrets or application environment variables.
+# The service holds no model provider key at all.
 #
-# Read/replay endpoints are public for the demo. A weekly step requires the caller's
-# X-Gemini-API-Key, so the service cannot spend project-owned provider quota.
+# Read/replay endpoints are public for the demo. The deployment is replay-only: a weekly
+# step is refused outright, so the service cannot mint decisions or spend provider quota.
 #
 # Usage: infra/cloudrun/deploy.sh [region]
 

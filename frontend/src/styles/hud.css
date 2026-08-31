@@ -33,7 +33,9 @@
   --radius-tile: 14px;
 }
 
-/* The graph-paper overlay is body-wide; in here the honeycomb replaces it. */
+/* The graph-paper overlay is body-wide; in here the rendered honeycomb replaces it — the same
+   photographic backdrop family the landing uses, so leaving the marketing surface for the
+   instruments no longer switches visual worlds. */
 body:has(.hud)::before { display: none; }
 .hud::before {
   position: fixed;
@@ -44,10 +46,8 @@ body:has(.hud)::before { display: none; }
   background:
     radial-gradient(90% 60% at 50% -12%, #1d5c9633 0%, transparent 62%),
     radial-gradient(70% 50% at 50% 108%, #0d3a6626 0%, transparent 60%),
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34.6' height='60' viewBox='0 0 34.6 60'%3E%3Cg fill='none' stroke='%23bcd9f2' stroke-width='1'%3E%3Cpath d='M17.3 0 34.6 10 34.6 30 17.3 40 0 30 0 10Z'/%3E%3Cpath d='M0 30 17.3 40 17.3 60 0 70 -17.3 60 -17.3 40Z'/%3E%3Cpath d='M34.6 30 51.9 40 51.9 60 34.6 70 17.3 60 17.3 40Z'/%3E%3C/g%3E%3C/svg%3E")
-      0 0 / 104px 180px,
+    url("/bg-app.webp") center bottom / cover no-repeat,
     #060d16;
-  background-blend-mode: normal, normal, overlay, normal;
   opacity: 0.94;
 }
 

@@ -60,86 +60,11 @@ IdempotencyKeyHeader = Annotated[
     str,
     Header(min_length=1, max_length=200, alias="Idempotency-Key"),
 ]
-GeminiApiKeyHeader = Annotated[
-    str | None,
-    Header(min_length=20, max_length=256, alias="X-Gemini-API-Key"),
-]
-
-
-def _manager_with_gemini_key(
-    base: RunManager,
-    *,
-    api_key: str,
-    model: str,
-) -> RunManager:
-    """Build an ephemeral agent graph around durable run and benchmark state.
-
-    The participant key lives only in this request-scoped object. It is never placed in
-    repository state, provider traces, receipts, events, or application globals.
-    """
-
-    from lithops.infrastructure.llm.gemini_adk_provider import GeminiAdkProvider
-
-    provider = GeminiAdkProvider(api_key=api_key, model=model)
-    executive = ExecutiveDecisionEngine(provider)
-    challenge = ExecutableModelChallenge(
-        repository=base.learning_repository,
-        authors=(
-            ConversionComponentAuthor(
-                spec=SMOOTH_CONVERSION_ARCHITECT,
-                provider=provider,
-                provider_name="gemini",
-            ),
-            ConversionComponentAuthor(
-                spec=THRESHOLD_CONVERSION_ARCHITECT,
-                provider=provider,
-                provider_name="gemini",
-            ),
-            *tuple(
-                ModelCodingAgent(
-                    spec=spec,
-                    provider=provider,
-                    provider_name="gemini",
-                )
-                for spec in (
-                    PRICING_MODEL_CODER,
-                    ACQUISITION_MODEL_CODER,
-                    RETENTION_MODEL_CODER,
-                    CAPACITY_MODEL_CODER,
-                )
-            ),
-        ),
-    )
-    return RunManager(
-        repository=base.repository,
-        learning_repository=base.learning_repository,
-        benchmark=base.benchmark,
-        decision_engine=executive,
-        model_challenge_cooldown_days=base.model_challenge_cooldown_days,
-        planning_rollouts=base.planning_rollouts,
-        executable_model_planner=ExecutableModelPlanner(
-            repository=base.learning_repository,
-            executive=executive,
-        ),
-        executable_model_challenge=challenge,
-        executive_authority_v2=base.executive_authority_v2,
-    )
-
-
-def get_execution_manager(
-    request: Request,
-    gemini_api_key: GeminiApiKeyHeader = None,
-) -> RunManager:
-    if gemini_api_key is not None:
-        return _manager_with_gemini_key(
-            request.app.state.run_manager,
-            api_key=gemini_api_key,
-            model=request.app.state.gemini_model,
-        )
-    if request.app.state.require_byok:
+def get_execution_manager(request: Request) -> RunManager:
+    if request.app.state.replay_only:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="A Gemini API key is required to advance this cloud simulation.",
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This deployment is a read-only replay; runs cannot be advanced here.",
         )
     return request.app.state.run_manager
 
@@ -267,7 +192,7 @@ def build_manager(settings: Settings | None = None) -> RunManager:
 def create_app(
     manager: RunManager | None = None,
     *,
-    require_byok: bool | None = None,
+    replay_only: bool | None = None,
 ) -> FastAPI:
     resolved = Settings.from_env() if manager is None else None
     application = FastAPI(
@@ -280,16 +205,15 @@ def create_app(
         allow_origins=["*"],
         allow_credentials=False,
         allow_methods=["GET", "POST"],
-        allow_headers=["Content-Type", "Idempotency-Key", "X-Gemini-API-Key"],
+        allow_headers=["Content-Type", "Idempotency-Key"],
         expose_headers=["X-Correlation-ID"],
     )
     application.state.run_manager = manager or build_manager(resolved)
-    application.state.gemini_model = (
-        resolved.gemini_model if resolved is not None else "gemini-3.7-flash"
-    )
-    application.state.require_byok = (
-        require_byok
-        if require_byok is not None
+    # The public cockpit deployment (static engine over the shared ledger) must never
+    # advance a run: a step there would mint decisions no model ever made.
+    application.state.replay_only = (
+        replay_only
+        if replay_only is not None
         else (
             resolved is not None
             and resolved.model_provider == "static"

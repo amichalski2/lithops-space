@@ -1,20 +1,11 @@
-import { ErrorNotice } from "../../components/ui/ErrorNotice";
-import { ByokPlaceholder } from "./ByokPlaceholder";
-
 const LOOP = ["Observe", "Model", "Simulate", "Act", "Evaluate", "Recalibrate"];
 
 export function LaunchPanel({
   replayRunId,
-  busy,
-  error,
   onReplay,
-  onCreate,
 }: {
   replayRunId: string | null;
-  busy: boolean;
-  error: string | null;
   onReplay: () => void;
-  onCreate: (geminiApiKey: string) => void;
 }) {
   return (
     <section className="launch-panel">
@@ -38,12 +29,9 @@ export function LaunchPanel({
               Replay best CEO-Bench run
             </button>
           ) : (
-            <p className="lede">Enter your Gemini key below to create a fresh cloud simulation.</p>
+            <p className="lede">No finished run is configured for replay yet.</p>
           )}
         </div>
-
-        {error && <ErrorNotice message={error} />}
-        <ByokPlaceholder busy={busy} onCreate={onCreate} />
       </div>
 
       <div className="loop-rail" aria-label="Lithops operating loop">

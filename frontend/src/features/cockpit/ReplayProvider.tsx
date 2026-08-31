@@ -16,7 +16,6 @@ import { ErrorNotice } from "../../components/ui/ErrorNotice";
 import { LoadingState } from "../../components/ui/LoadingState";
 import { useReplayClock, type ReplayClock } from "../../hooks/useReplayClock";
 import { buildReplayData, isTerminal, type ReplayData } from "../../lib/replay";
-import { getGeminiApiKey } from "../runs/byok";
 
 const POLL_INTERVAL_MS = 5_000;
 export const STORED_RUN_KEY = "lithops.active-run";
@@ -29,10 +28,6 @@ export type ReplayContextValue = {
   goLive: () => void;
   /** True while per-week model versions are still being fetched in the background. */
   syncing: boolean;
-  busy: boolean;
-  notice: string | null;
-  dismissNotice: () => void;
-  advanceWeek: () => Promise<void>;
   explanationFor: (decisionId: string) => DecisionExplanation | null;
 };
 
@@ -67,8 +62,6 @@ export function ReplayProvider({
 }) {
   const [data, setData] = useState<ReplayData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [notice, setNotice] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [live, setLive] = useState(false);
 
@@ -222,32 +215,6 @@ export function ReplayProvider({
     [clock],
   );
 
-  const advanceWeek = useCallback(async () => {
-    setBusy(true);
-    setNotice(null);
-    try {
-      await lithopsApi.stepRun(
-        runId,
-        `cockpit-${crypto.randomUUID()}`,
-        getGeminiApiKey(),
-      );
-      const next = await refresh();
-      setLive(true);
-      seek(next.run.current_day);
-      await syncExplanations(next);
-    } catch (reason) {
-      setNotice(
-        reason instanceof ApiError && reason.status === 409
-          ? "An operation is already in progress for this run."
-          : reason instanceof Error
-            ? reason.message
-            : "Could not advance the run",
-      );
-    } finally {
-      setBusy(false);
-    }
-  }, [runId, refresh, seek, syncExplanations]);
-
   const value = useMemo<ReplayContextValue | null>(
     () =>
       data
@@ -257,14 +224,10 @@ export function ReplayProvider({
             live,
             goLive,
             syncing,
-            busy,
-            notice,
-            dismissNotice: () => setNotice(null),
-            advanceWeek,
             explanationFor: (decisionId: string) => data.explanations.get(decisionId) ?? null,
           }
         : null,
-    [data, controls, live, goLive, syncing, busy, notice, advanceWeek],
+    [data, controls, live, goLive, syncing],
   );
 
   if (error) {

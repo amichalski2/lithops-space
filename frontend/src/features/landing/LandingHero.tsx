@@ -5,9 +5,12 @@ const STACK = [
   "Gemini 3.7",
   "Google ADK",
   "Cloud Run",
+  "Cloud Build",
+  "Artifact Registry",
+  "Cloud Storage",
+  "Secret Manager",
   "Cloud Logging",
   "Supabase",
-  "BYOK",
 ];
 
 /**
@@ -15,17 +18,13 @@ const STACK = [
  * job is to get a visitor into a run — everything past this screen lives behind the primary CTA.
  */
 export function LandingHero({
-  hasDemoRun,
   busy,
   error,
   onRun,
-  onCreate,
 }: {
-  hasDemoRun: boolean;
   busy: boolean;
   error: string | null;
   onRun: () => void;
-  onCreate: () => void;
 }) {
   return (
     <main className="landing">
@@ -63,18 +62,12 @@ export function LandingHero({
 
           <div className="landing-actions">
             <button className="pill pill-solid" disabled={busy} onClick={onRun}>
-              {busy && !hasDemoRun ? "Initializing" : "Run Simulation"}
+              {busy ? "Initializing" : "Run Simulation"}
               <i aria-hidden>↗</i>
             </button>
-            {hasDemoRun && (
-              <button className="pill pill-ghost" disabled={busy} onClick={onCreate}>
-                {busy ? "Initializing" : "Create a Fresh Run"}
-                <i aria-hidden>↗</i>
-              </button>
-            )}
           </div>
 
-          {error && <ErrorNotice message={error} onRetry={onCreate} />}
+          {error && <ErrorNotice message={error} onRetry={onRun} />}
         </section>
       </div>
 

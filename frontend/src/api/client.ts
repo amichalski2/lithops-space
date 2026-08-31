@@ -60,12 +60,4 @@ export const lithopsApi = {
     request<PredictionView[]>(`/runs/${runId}/predictions`),
   listEvents: (runId: string) => request<EventRecord[]>(`/runs/${runId}/events`),
   getReport: (runId: string) => request<RunReport>(`/runs/${runId}/report`),
-  stepRun: (runId: string, idempotencyKey: string, geminiApiKey?: string | null) =>
-    request<StepResult>(`/runs/${runId}/step`, {
-      method: "POST",
-      headers: {
-        "Idempotency-Key": idempotencyKey,
-        ...(geminiApiKey ? { "X-Gemini-API-Key": geminiApiKey } : {}),
-      },
-    }),
 };

@@ -24,19 +24,26 @@ test("shows only services that exist in the submitted architecture", () => {
   expect(stack).toHaveTextContent("Gemini 3.7");
   expect(stack).toHaveTextContent("Google ADK");
   expect(stack).toHaveTextContent("Cloud Run");
+  expect(stack).toHaveTextContent("Cloud Build");
+  expect(stack).toHaveTextContent("Artifact Registry");
+  expect(stack).toHaveTextContent("Cloud Storage");
+  expect(stack).toHaveTextContent("Secret Manager");
   expect(stack).toHaveTextContent("Cloud Logging");
   expect(stack).toHaveTextContent("Supabase");
-  expect(stack).toHaveTextContent("BYOK");
+  expect(stack).not.toHaveTextContent("BYOK");
   expect(stack).not.toHaveTextContent("Firestore");
 });
 
-test("routes a fresh participant to the BYOK launch instead of minting an inert run", async () => {
+test("routes a fresh participant to the replay-only launch instead of a key form", async () => {
   const user = userEvent.setup();
   renderAt("/");
 
   await user.click(screen.getByRole("button", { name: /Run Simulation/ }));
 
-  expect(await screen.findByRole("region", { name: "Bring your own key" })).toBeInTheDocument();
+  expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent(
+    "Learn the business.",
+  );
+  expect(screen.queryByLabelText("Gemini API key")).not.toBeInTheDocument();
 });
 
 test("opens the configured demo run paused, behind a guided tour of the panels", async () => {

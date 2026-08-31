@@ -21,7 +21,7 @@ Gemini decides the strategy every simulated week; deterministic, hand-written co
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 [![Hackathon](https://img.shields.io/badge/All%20Things%20Agentic-Hackathon-FF6F00)](#license)
 
-**[Live replay of a finished 504-day run →](https://lithops.space)** · [Build log / blog post](blog/lithops_blogpost_en.md) · [Architecture](#architecture) · [Bring your own environment](#point-it-at-your-own-company-problem)
+**[Live replay of a finished 504-day run →](https://lithops.space)** · [Architecture](#architecture) · [Bring your own environment](#point-it-at-your-own-company-problem)
 
 </div>
 
@@ -37,30 +37,15 @@ On CEO-Bench seed 137, raw Gemini Flash ends its best unassisted run with $75k o
 
 | Three generations of the harness, same seed | The week the growth died |
 | :---: | :---: |
-| ![Three runs of the same seed](blog/viz_three_runs.png) | ![Week 11 decision](blog/viz_week11.png) |
+| ![Three runs of the same seed](docs/viz_three_runs.png) | ![Week 11 decision](docs/viz_week11.png) |
 
 A full run costs $5-40 of Gemini inference (depending on how much world-model authoring it does) and about three hours on a 2 vCPU Cloud Run Job.
 
 ## Architecture
 
-![Lithops agent architecture](blog/lithops_architecture_agents.png)
+![Lithops agent architecture](docs/lithops_architecture_agents.png)
 
 ### How one week works
-
-```mermaid
-flowchart LR
-    Environment[Benchmark adapter] --> Observe[Normalize observation]
-    Observe --> Ledger[Score prediction ledger]
-    Ledger --> Model[World model]
-    Model --> Executive[Executive agent - Gemini]
-    Executive --> Simulator[Monte Carlo simulation and gates]
-    Simulator --> Commit[Commit forecast and hash]
-    Commit --> Gateway[Idempotent action gateway]
-    Gateway --> Environment
-    Model -. degraded .-> Builders[Scoped coding agents - Gemini]
-    Builders --> Validation[Sandbox, static validation, temporal backtest]
-    Validation -. accepted .-> Model
-```
 
 1. Normalize the latest observation (unit registry; missing data is *missing*, never zero).
 2. Score every forecast whose outcome has now arrived.
@@ -200,7 +185,7 @@ Use [`backend/src/lithops/benchmark/fake.py`](backend/src/lithops/benchmark/fake
 
 ## Deploy on Google Cloud
 
-![Lithops system architecture on Google Cloud](blog/lithops_architecture_system.png)
+![Lithops system architecture on Google Cloud](docs/lithops_architecture_system.png)
 
 Two paths, both scripted:
 
@@ -250,7 +235,7 @@ frontend/              React cockpit and generated OpenAPI types
 deploy/cloudrun/       autonomous Cloud Run Job deployment
 infra/                 Cloud Run service deploy and Supabase migrations
 scripts/               experiment runners and verification commands
-blog/                  build log, architecture diagrams, run visualizations
+docs/                  architecture diagrams, run visualizations, design notes
 ```
 
 ## License
